@@ -5,10 +5,12 @@ from flask import Flask
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    print('at the first', app.instance_path, __name__)
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
+
 
     if test_config is None:
         # load the instance config, if it exists, when not testing
@@ -28,13 +30,19 @@ def create_app(test_config=None):
     def hello():
         return 'hello world!'
 
+    print('how about here?')
     from . import db
-    db.init_db()
+    db.init_app(app)
+    print('here won\'t be printed')
 
     from . import auth
-    app.register_blueprint(auth.pb)
+    app.register_blueprint(auth.bp)
+
+    from . import blog
+    app.register_blueprint(blog.bp)
 
     return app
 
 
-
+if __name__ == '__main__':
+    create_app().run()

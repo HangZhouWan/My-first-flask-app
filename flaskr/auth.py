@@ -7,10 +7,10 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 
-pb = Blueprint('auth', __name__, url_prefix='/auth')
+bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
-@pb.route('/register', method=('GET', 'POST'))
+@bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -23,7 +23,7 @@ def register():
         if not password:
             error = 'Password is required!'
         elif db.execute(
-                'SELECT id FROM user WHERE username = ?', (username)
+                'SELECT id FROM user WHERE username = ?', (username,)
         ).fetchone() is not None:
             error = 'User {} is already registered.'.format(username)
 
@@ -40,7 +40,7 @@ def register():
     return render_template('auth/register.html')
 
 
-@pb.route('/login', method=('GET', 'POST'))
+@bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -59,13 +59,13 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            return redirect(url_for('blog.index'))
         flash(error)
 
-        return render_template('auth/login.html')
+    return render_template('auth/login.html')
 
 
-@pb.before_app_request
+@bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
 
@@ -77,7 +77,7 @@ def load_logged_in_user():
         ).fetchone()
 
 
-@pb.route('/logout')
+@bp.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))

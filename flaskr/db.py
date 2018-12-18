@@ -6,8 +6,9 @@ from flask import current_app, g
 
 
 def get_db():
-    print(g)
+    print('also ok here!')
     if 'db' not in g:
+        print('is ok here?')
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
             detect_types=sqlite3.PARSE_DECLTYPES
@@ -17,14 +18,17 @@ def get_db():
     return g.db
 
 
-def close_db():
+def close_db(e=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 
 def init_db():
+    print('here is ok!')
     db = get_db()
+
+    print('here is not ok!')
     with current_app.open_resource('schema.sql') as f:
         db.cursor().executescript(f.read().decode('utf-8'))
 
@@ -33,6 +37,7 @@ def init_db():
 @with_appcontext
 def init_db_command():
     """Clear the existing data and create the new tables."""
+    print('run here!')
     init_db()
     click.echo('Initialized the database.')
 
